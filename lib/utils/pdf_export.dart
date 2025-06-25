@@ -6,6 +6,10 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../models/product.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:printing/printing.dart';
+import 'dart:html' as html;
+
 Future<Uint8List> generateProductPdf(List<Product> products) async {
   final pdf = pw.Document();
   final fontData = await rootBundle.load("assets/fonts/Alef-Regular.ttf");
@@ -35,4 +39,24 @@ Future<Uint8List> generateProductPdf(List<Product> products) async {
   );
 
   return pdf.save();
+}
+
+
+void exportProductPdf(List<Product> products) async {
+  final pdfBytes = await generateProductPdf(products);
+
+  if (kIsWeb) {
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    final isSafari = userAgent.contains('safari') && !userAgent.contains('chrome');
+
+    if (isSafari) {
+      final newWindow = html.window.open('', '_blank');
+      final blob = html.Blob([pdfBytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      newWindow!.location.href = url;
+      return;
+    }
+  }
+
+  await Printing.layoutPdf(onLayout: (format) async => pdfBytes);
 }
