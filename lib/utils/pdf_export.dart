@@ -8,7 +8,8 @@ import '../models/product.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:printing/printing.dart';
-import 'dart:html' as html;
+import 'pdf_export_stub.dart'
+  if (dart.library.html) 'pdf_export_web.dart';
 
 Future<Uint8List> generateProductPdf(List<Product> products) async {
   final pdf = pw.Document();
@@ -46,16 +47,8 @@ void exportProductPdf(List<Product> products) async {
   final pdfBytes = await generateProductPdf(products);
 
   if (kIsWeb) {
-    final userAgent = html.window.navigator.userAgent.toLowerCase();
-    final isSafari = userAgent.contains('safari') && !userAgent.contains('chrome');
-
-    if (isSafari) {
-      final newWindow = html.window.open('', '_blank');
-      final blob = html.Blob([pdfBytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      newWindow!.location.href = url;
-      return;
-    }
+    exportPdfToNewTab(pdfBytes);
+    return;
   }
 
   await Printing.layoutPdf(onLayout: (format) async => pdfBytes);

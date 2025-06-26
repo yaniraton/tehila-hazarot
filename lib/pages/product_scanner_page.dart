@@ -8,7 +8,8 @@ import '../widgets/product_form.dart';
 import '../widgets/product_list.dart';
 import '../widgets/export_button.dart';
 import '../utils/pdf_export.dart';
-import '../web/qr_scanner_web.dart';
+import '../web/qr_scanner_stub.dart'
+    if (dart.library.html) '../web/qr_scanner_web.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 
 class ProductScannerPage extends StatefulWidget {
@@ -78,24 +79,29 @@ class _ProductScannerPageState extends State<ProductScannerPage> {
         title: const Text('Supermarket Scanner'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            ProductForm(
-              barcodeController: _barcodeController,
-              nameController: _nameController,
-              quantityController: _quantityController,
-              onAddProduct: _addProduct,
-              onScanBarcode: _scanBarcode,
-            ),
-            const Divider(height: 32),
-            Expanded(
-              child: ProductList(products: _products),
-            ),
-            const SizedBox(height: 8),
-            ExportButton(onExport: _printFile),
-          ],
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ProductForm(
+                barcodeController: _barcodeController,
+                nameController: _nameController,
+                quantityController: _quantityController,
+                onAddProduct: _addProduct,
+                onScanBarcode: _scanBarcode,
+              ),
+              const Divider(height: 32),
+              SizedBox(
+                height: 300,
+                child: ProductList(products: _products),
+              ),
+              const SizedBox(height: 8),
+              ExportButton(onExport: _printFile),
+            ],
+          ),
         ),
       ),
     );
